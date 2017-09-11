@@ -21,7 +21,7 @@ from optparse import OptionParser
 NGINX_TRANSFER_DIR = '/usr/share/nginx/html/slider'
 DESCRIPTION = NGINX_TRANSFER_DIR+'/description'
 block_size = 16384
-CHUNK_NAME = 'slider_chunk'
+CHUNK_NAME = 'slider-chunk'
 OF_DIR = '/tmp/chunks'
 
 def main():
@@ -63,11 +63,14 @@ def main():
         #conn.close()
 
 def compress_chunks(chunk, i):
-    compressed_chunk = bz2.compress(bytes(chunk.encode('utf-8')))
     chunk_ar_name = '{0}-{1}'.format(CHUNK_NAME, str(i))
-    with open('{0}/{1}.bz2'.format(NGINX_TRANSFER_DIR, chunk_ar_name), 'wb') as flow:
-        flow.write(compressed_chunk)
+    with open('{}/{}'.format(OF_DIR, chunk_ar_name), 'rb') as data:
+        content = data.read()
+        compresed_content = bz2.compress(content)
     chunk_ar_name += '.bz2'
+    with open('{}/{}'.format(NGINX_TRANSFER_DIR, chunk_ar_name), 'wb') as flow:
+        flow.write(compresed_content)
+    #compressed_chunk = bz2.compress(bytes(chunk.encode('utf-8')))
     return chunk_ar_name, count_checksum(chunk_ar_name)
 
 def count_checksum(chunk_archive):
